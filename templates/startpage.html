@@ -1,19 +1,14 @@
 {% extends 'body.html' %}
 {% block body %}
-<p>
-witaj, {{ current_user.username }} 
-<a href="{{ url_for('index') }}">index</a>
-<a href="{{url_for('logout')}}">logout</a>
-</p>
-<h1>witam na mojej stronie</h1>
+<h1>Welcome on StockTracker - site that tracks Your stocks</h1>
 <a href="/refresh">refresh prices</a> 
 <div class="w3-container">
 <div class="page-content">
 
 <table>
     <tr>
-        <th>name</th>
-        <th  width="23%">amound</th>
+        <th width="18%">name</th>
+        <th width="13%">amound</th>
         <th>price</th>
         <th>change %</th>
         <th>change abs</th>
@@ -29,7 +24,7 @@ witaj, {{ current_user.username }}
         <th>{{ item.change_rel }}</th>
         <th>{{ item.change_absolute }}</th>
         <th>{{ item.count*item.starting_price }}</th>
-        <th>{{ item.count*item.last_price }}</th>
+        <th>{{ (item.count*item.last_price ) }}</th>
         <th>    
             <a href="/delete/{{ item.id }}">    delete </a>    
             <a href="/modify/{{ item.id }}">    modify </a>
@@ -43,24 +38,15 @@ witaj, {{ current_user.username }}
 </div>
 
 
-<!-- {% if item_to_mod %}  
-<h4>modify {{ item_to_mod.symbol }}:</h4>
-<form action="/modify/{{ item_to_mod.id }}" method="POST">
- <input type='text' name="new_count" value="{{ item_to_mod.count }}" size=3 checked=True/>
- <input type="submit" value="OK"/>
-</form>        
-{% endif %} -->
 
-<br/>
-<br/>
+
 
 <form action="/add_item" method="POST">
-
+Add item:<br/>
     <input type='text' name="stock_symbol" placeholder="stock name .. "/>
-    <input type="text" name="count"/>
-    <!-- <label for="stock_symbol">stock name</label> -->
+    <input type="text" name="count" placeholder="count "/>
 
-    <input type="submit"/>
+    <input type="submit" value="Submit"/>
 </form>
 
 

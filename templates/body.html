@@ -8,6 +8,11 @@
 
 <body>
     
+hello, <a href="/profile">{{ current_user.username }}</a>
+<a href="{{ url_for('index') }}">dashboard</a>
+<a href="{{url_for('logout')}}">logout</a>
+
+
     {% block body %}    {% endblock %}
     
 </body>

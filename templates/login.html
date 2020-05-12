@@ -10,6 +10,10 @@
 <div>
 <form action="#" method=POST>   
 
+{% if failed %}
+<h4>invalid username or password</h4>
+{% endif %}
+
     <h3>sing in form</h3>
     {{ form.hidden_tag() }}        
     

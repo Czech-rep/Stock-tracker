@@ -23,13 +23,11 @@ def login():
         user = User.query.filter_by(username=form.username.data).first()
         if user is None or not check_password_hash(user.password, form.password.data):
             flash('invalid username or password')
-            return redirect(url_for('login'))
+            return render_template('login.html', form=form, failed=True)
         login_user(user, remember=form.remember.data)       # stores user under current_user
         return redirect('/')                                # theres an option to extract info from next_page = request.args.get('next') and go there
-    else:
-        flash('incorrect passes')
 
-    return render_template('login.html', form=form)
+    return render_template('login.html', form=form, failed=False)
 
 # new_item = StocksItems(symbol=symbol, count=count)
 @app.route('/signup/', methods=['GET', 'POST'])

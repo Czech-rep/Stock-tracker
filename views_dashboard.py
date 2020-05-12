@@ -4,11 +4,10 @@ from flask_login import login_required
 
 from main import app
 from database import db, StocksItems
-from price_scrapper import price_extracter_conv
+from bankier_scr import price_extracter_conv, ScrappingFailed
 from loging import login_manager
 
 @app.route('/') # route decorator should be outermost - but why?
-@app.route('/index/')
 @login_required
 def index():
     items = StocksItems.query.all()                     # czemu query dotyczy klasy a nie db
@@ -22,12 +21,11 @@ def add_item():
         try:
             count = int(count)
         except ValueError:
-            return render_template('error_page.html', error_message="invalid count of asset", url_back=url_back)
-            # error_page("invalid count of asset", url_back='/')
-        results = price_extracter_conv(symbol)
-        if results is None:                                #checks if symbol is correct
-            return render_template('error_page.html', error_message="unknown asset symbol provided")
-            return "unknown asset symbol provided. <br/> <a href='/'> back </a>"
+            return render_template('error_page.html', error_message=f"invalid count of asset: '{count}' is not a number", url_back='/')
+        try:
+            results = price_extracter_conv(symbol)
+        except ScrappingFailed as e:                         
+            return render_template('error_page.html', error_message=e, url_back='/')
 
         new_item = StocksItems(symbol=symbol, count=count)
         try:
@@ -36,9 +34,9 @@ def add_item():
             new_item.starting_price = new_item.last_price
             db.session.commit()
         except NameError:
-            return render_template('error_page.html', error_message='issue adding item', url_back='/') #'<h3> issue adding item <br/> <a href="/">back</a> </h3>'
+            return render_template('error_page.html', error_message='issue adding item', url_back='/')
         except exc.IntegrityError:
-            return render_template('error_page.html', error_message='asset already in database')
+            return render_template('error_page.html', error_message=f'price of {symbol} is already tracked!', url_back='/')
     return redirect('/')
 
 @app.route('/delete/<int:id>')
@@ -49,7 +47,7 @@ def delete_item(id):
         db.session.delete(item_to_delete)
         db.session.commit()
     except:
-        return '<h3> delete not succeded </h3> <a href="/">back</a> '
+        return render_template('error_page.html', error_message='deletion unsuccessfull', url_back='/')
     return redirect('/')
 
 @app.route('/refresh/')
@@ -60,17 +58,17 @@ def refresh():      #funkcja pobiejaraca dane z sieci i wstawiajaca do bazy dany
     try:
         db.session.commit()
     except:
-        return 'not succeded refreshing'
+        return render_template('error_page.html', error_message='not succeded refreshing', url_back='/')
     return redirect('/')
 
 def save_prices(item, results):                             
     if results is not None: 
         try:                                                    
-            item.last_price, item.change_rel, item.change_absolute = results        #gets prices if not error
+            item.last_price, item.change_rel, item.change_absolute = results  # here out web scrapper is used
         except:
-            return 'issue updating item {{ item.id }}'
+            return render_template('error_page.html', error_message=f'issue occured during updating item {item.symbol}', url_back='/')
 
-@app.route('/modify/<int:id>', methods=['POST', 'GET']) # Just to enter modify mode
+@app.route('/modify/<int:id>', methods=['POST', 'GET']) # page for modification of quantity of asset
 @login_required
 def modify(id):
     item_to_modify = StocksItems.query.get_or_404(id)
@@ -79,21 +77,21 @@ def modify(id):
         try:
             count = int(count)
         except ValueError:
-            return "invalid new count provided"
+            return render_template('error_page.html', error_message=f"invalid count of asset: '{count}' is not a number", url_back=f'/modify/{id}')
         item_to_modify.count = count
         try:
             db.session.commit()
         except:
-            return 'not succeded updating'
+            return render_template('error_page.html', error_message=f'issue occured during updating item {item.symbol}', url_back='/')
         return redirect('/')
 
     return render_template('asset_alteration.html', item=item_to_modify)
 
-@app.route('/testowa/')
+@app.route('/profile/')
 @login_required
-def testowa():
-    return '<h3>siema</h3>'
+def profile():
+    items = StocksItems.query.all()   
+    S = sum( item.count*item.last_price for item in items )
+    print(S)
 
-# @app.route('/error_page/ms_code/url_back')
-# def error_page(error_message='some error occured', url_back='/'):
-#     return render_template('error_page.html', error_message="invalid count of asset", url_back=url_back)
+    return render_template('profile.html', total_wallet=S)
