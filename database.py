@@ -10,7 +10,7 @@ app.config['SECRET_KEY'] = 'thisissecret'
 db = SQLAlchemy(app)
 
 
-class StocksItems(db.Model):         #to nie baza danych. to fabryka dla zawartości
+class StocksItems(db.Model):         
     id = db.Column(db.Integer, primary_key=True)
     symbol = db.Column(db.String(50), nullable=False, unique=True)
     count = db.Column(db.Integer, default=1)
@@ -21,16 +21,16 @@ class StocksItems(db.Model):         #to nie baza danych. to fabryka dla zawarto
     date_created = db.Column(db.DateTime, default=datetime.utcnow)
 
 
-    def __repr__(self):     # tells Python how to print objects of this class
+    def __repr__(self):     
         return '<item %r>' % self.symbol 
 
 class User(UserMixin, db.Model):    # usermisin for injest flask login features
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(15), unique=True)
     email = db.Column(db.String(50), unique=True)
-    password = db.Column(db.String(80)) # mind password hashing method
+    password = db.Column(db.String(80)) # length - mind password hashing method
 
     
     
-    def __repr__(self):     # tells Python how to print objects of this class
+    def __repr__(self):    
         return '<item %r>' % self.username #orig
