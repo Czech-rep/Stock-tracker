@@ -1,0 +1,27 @@
+table, th, td  {
+    border: 1px solid black;
+}
+h1 {
+    /* color: red; */
+    /* text-align: center; */
+}
+td {
+    vertical-align: center;
+}
+div{
+    margin: auto;
+}
+div.page-content{
+    /* text-align: center; */
+    margin: 50px auto;
+}
+div.w3-container{
+    text-align: center;
+}
+th {
+    height: 60px;
+    vertical-align: center;
+}
+h1 {
+    color: red;
+}

@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>signup</title>
+
+</head>
+
+<body>
+    <h1>create your account</h1>
+<div>
+<form action="#" method=POST>   
+
+    <h3>pls sing in</h3>
+    {{ form.hidden_tag() }}         <!-- this is for security somewhat       -->
+    <p>{{ form.username.label }} <br> {{ form.username }} </p>
+    <p>{{ form.password.label }} <br> {{ form.password }} </p>
+    <p>{{ form.email.label }} <br> {{ form.email }} </p>
+    
+    
+
+    <button type="submit">create account</button>
+</form>
+
+</div>
+    
+    
+</body>
+
+
+</html>

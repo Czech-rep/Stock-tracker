@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>loging page</title>
+
+</head>
+
+<body>
+    <h1>enter Your loging credentials</h1>
+<div>
+<form action="#" method=POST>   
+
+    <h3>sing in form</h3>
+    {{ form.hidden_tag() }}        
+    
+    <p>{{ form.username.label }} <br> {{ form.username }} </p>
+    <p>{{ form.password.label }} <br> {{ form.password }} </p>
+    <p>{{ form.remember.label }}:  {{ form.remember }}</p>
+
+    <button type="submit">submit</button>
+</form>
+
+<p>
+    Not our member? <a href="/signup">sign up!</a>
+</p>
+
+</div>
+    
+    
+</body>
+
+
+</html>
