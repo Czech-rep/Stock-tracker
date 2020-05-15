@@ -44,19 +44,18 @@ def add_item():
         except ValueError:
             return render_template('error_page.html', error_message=f"invalid count of asset: '{count}' is not a number", url_back='/')
         
-        # lets check symbol
-        asset_id = None
+        asset_id = None # lets check symbol
         is_it_in = StockData.query.filter_by(symbol=symbol).first()
         if is_it_in is not None:                                                    # so this asset is already tracked # we could refresh
             asset_id = is_it_in.id
-            if UserItems.query.filter_by(user_id=current_user.id, asset_id=asset_id).first():   # does this user have this item ?
+            if UserItems.query.filter_by(user_id=current_user.id, asset_id=asset_id).first():   # check if current user have this item
                 return render_template('error_page.html', error_message=f'price of {symbol} is already tracked! Use modify to change quantity', url_back='/')
         else:
             try:
                 new_asset = StockData(symbol=symbol)
-                save_prices(new_asset)                       # update or save of prices # exception is handled inside
+                item.last_price, item.change_rel, item.change_absolute = price_extracter_conv(item.symbol) # scrapping
                 db.session.add(new_asset) 
-                db.session.commit()                         # i have to add to db to have asset_id
+                db.session.commit()                         
             except ScrappingFailed as e:
                 return render_template('error_page.html', error_message=e, url_back='/')
         if asset_id is None: asset_id = new_asset.id  
@@ -73,17 +72,8 @@ def add_item():
 @app.route('/delete/<int:id>')
 @login_required
 def delete_item(id):
-    # item_to_delete = UserItems.query.get_or_404(id)
-    # try:
-    #     db.session.delete(item_to_delete)
-    #     db.session.commit()
-    # except:
-    #     return render_template('error_page.html', error_message='deletion unsuccessfull', url_back='/')
-    # clean_db() # function cleanes untracked items
-    # return redirect('/')
     conn = sqlite3.connect('database.db')
     c = conn.cursor()
-    # c.execute(f'delete from user_items where user_id={current_user.id} and asset_id={id}')
     c.execute(f'delete from user_items where id={id}') # we have access to key in table user_items
     c.execute(f'''
     delete from stock_data 
@@ -95,36 +85,20 @@ def delete_item(id):
     print(6)
     return redirect('/')
 
-def clean_db(): # function deletes stocks items that are not tracked by any user
-    conn = sqlite3.connect('database.db')
-    c = conn.cursor()
-    c.execute(f''' 
-    delete from stock_data where id not in (
-        select asset_id 
-        from user_items 
-        group by asset_id )
-    ''')
-    # c.execute('delete from stock_data where symbol like "11%"; ') # for testing
-    conn.commit()
-    print(6)
-
 @app.route('/refresh/')
 @login_required
 def refresh():      # for now, it will update all tracked assets, no matter by who
     try:
-        for item in StockData.query.all():
-            save_prices(item)
+        for item in StockData.query.all():    # here out web scrapper is used
+            item.last_price, item.change_rel, item.change_absolute = price_extracter_conv(item.symbol)   
         db.session.commit()
     except ScrappingFailed as e:
         return render_template('error_page.html', error_message=e, url_back='/')
     except:
         return render_template('error_page.html', error_message='not succeded refreshing', url_back='/')
-    return redirect('/')
+    return redirect('/') 
 
-def save_prices(item):    # takes object of StockCata   # function updates data for one asset    
-    item.last_price, item.change_rel, item.change_absolute = price_extracter_conv(item.symbol)   # here out web scrapper is used
-
-@app.route('/modify/<int:id>', methods=['POST', 'GET']) # page for modification of quantity of asset
+@app.route('/modify/<int:id>', methods=['POST', 'GET']) 
 @login_required
 def modify(id):
     item_to_modify = UserItems.query.get_or_404(id)
@@ -146,8 +120,6 @@ def modify(id):
 @app.route('/profile/') # why does order of decorators matter?
 @login_required
 def profile():
-    # items = UserItems.query.all()   
-    # S = sum( item.count*item.last_price for item in items )
     conn = sqlite3.connect('database.db')
     c = conn.cursor()
     c.execute(f''' 
@@ -159,5 +131,5 @@ def profile():
     S = c.fetchall()[0][0]
     print(S)
 
-    return render_template('profile.html', wallet_value=S) # current_user doesnt even need to bo provided
+    return render_template('profile.html', wallet_value=S) 
 
