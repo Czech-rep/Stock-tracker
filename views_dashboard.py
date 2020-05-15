@@ -73,13 +73,26 @@ def add_item():
 @app.route('/delete/<int:id>')
 @login_required
 def delete_item(id):
-    item_to_delete = UserItems.query.get_or_404(id)
-    try:
-        db.session.delete(item_to_delete)
-        db.session.commit()
-    except:
-        return render_template('error_page.html', error_message='deletion unsuccessfull', url_back='/')
-    clean_db() # function cleanes untracked items
+    # item_to_delete = UserItems.query.get_or_404(id)
+    # try:
+    #     db.session.delete(item_to_delete)
+    #     db.session.commit()
+    # except:
+    #     return render_template('error_page.html', error_message='deletion unsuccessfull', url_back='/')
+    # clean_db() # function cleanes untracked items
+    # return redirect('/')
+    conn = sqlite3.connect('database.db')
+    c = conn.cursor()
+    # c.execute(f'delete from user_items where user_id={current_user.id} and asset_id={id}')
+    c.execute(f'delete from user_items where id={id}') # we have access to key in table user_items
+    c.execute(f'''
+    delete from stock_data 
+    where id not in (
+        select distinct asset_id from user_items
+    )
+    ''') # could be better efficiency
+    conn.commit()
+    print(6)
     return redirect('/')
 
 def clean_db(): # function deletes stocks items that are not tracked by any user
@@ -89,8 +102,8 @@ def clean_db(): # function deletes stocks items that are not tracked by any user
     delete from stock_data where id not in (
         select asset_id 
         from user_items 
-        group by asset_id
-    );''')
+        group by asset_id )
+    ''')
     # c.execute('delete from stock_data where symbol like "11%"; ') # for testing
     conn.commit()
     print(6)
