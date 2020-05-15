@@ -8,8 +8,7 @@ from forms import LoginForm, RegisterForm
 from database import db, User
 
 # object that tracks if were logged in 
-login_manager = LoginManager()      # login = LoginManager(app)
-login_manager.init_app(app)
+login_manager = LoginManager(app)      
 login_manager.login_view = 'login'  # manager needs to know where to redirect in case of no login
 
 
@@ -20,10 +19,13 @@ def login():
         return redirect(url_for('index'))
     form = LoginForm()
     if form.validate_on_submit():   
-        user = User.query.filter_by(username=form.username.data).first()
-        if user is None or not check_password_hash(user.password, form.password.data):
-            flash('invalid username or password')
-            return render_template('login.html', form=form, failed=True)
+        user = User.query.filter_by(username=form.username.data).first() # find user in User database
+        if user is None:
+            return render_template('error_page.html', error_message='user not found', url_back='/login')
+        if not check_password_hash(user.password, form.password.data):
+            # flash('invalid username or password')
+            return render_template('error_page.html', error_message='invalid passes', url_back='/login')
+            # return render_template('login.html', form=form, failed=True)
         login_user(user, remember=form.remember.data)       # stores user under current_user
         return redirect('/')                                # theres an option to extract info from next_page = request.args.get('next') and go there
 
@@ -44,7 +46,7 @@ def signup():
             db.session.commit()
             return '<h3>new user has been cerated<h3>' # now route to dashboard
         except exc.IntegrityError:# as e:
-            return 'one of params not uniqu.    <a href="/signup">go back</a>       '#+'\n'+str(e)
+            return 'one of params not unique.    <a href="/signup">go back</a>       '#+'\n'+str(e)
     
         
     return render_template('signup.html', form=form)

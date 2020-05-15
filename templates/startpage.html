@@ -12,7 +12,6 @@
         <th>price</th>
         <th>change %</th>
         <th>change abs</th>
-        <th>starting value</th>
         <th>total value</th>
         <th>actions</th>
     </tr>
@@ -20,11 +19,11 @@
     <tr>
         <th>{{ item.symbol }}</th>
         <th>{{ item.count }}</th>
-        <th>{{ item.last_price }}</th>
+        <th>{{ item.price }}</th>
         <th>{{ item.change_rel }}</th>
         <th>{{ item.change_absolute }}</th>
-        <th>{{ item.count*item.starting_price }}</th>
-        <th>{{ (item.count*item.last_price ) }}</th>
+        <th>{{ item.value }}</th>
+        
         <th>    
             <a href="/delete/{{ item.id }}">    delete </a>    
             <a href="/modify/{{ item.id }}">    modify </a>

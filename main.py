@@ -6,8 +6,8 @@ app = Flask(__name__)
 
 # if u import db im cmd import it form here
 
-from views import *
-from loging import *
+from views_dashboard import *
+from views_loging import *
 
 
 

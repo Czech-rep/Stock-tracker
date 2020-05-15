@@ -3,7 +3,8 @@
 {% block body %}
 <p>Hello user {{ current_user.username }}</p>
 
-<p>Total value of Your wallet is {{ total_wallet }}</p>
+<p>Total value of Your wallet is {{ wallet_value }}</p>
+<p>current email adress: {{ current_user.email }}</p>
 
 
 {% endblock %}
